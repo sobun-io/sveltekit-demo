@@ -16,7 +16,7 @@
 
   onMount(async () => {
     const config = {
-      license: '<YOUR_CSDK_LICENSE>',
+      license: '<YOUR_CESDK_LICENSE_KEY>',
     };
 
     engine = await CreativeEngine.init(config);

@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from 'svelte';
   import CreativeEngine from '@cesdk/engine';
   import { removeBackground } from '@imgly/background-removal';
+	import { page } from '$app/stores';
 
   /** @type {HTMLDivElement | null} */
   let canvasContainer = null;
@@ -176,7 +177,11 @@
   async function autoSize() {
     // Fill 50% of parent width, 100% of parent height
     if (!engine || imageBlockId == null) return;
-    engine.block.setSize(imageBlockId, 0.5, 1.0, { sizeMode: 'Percent' });
+    engine.block.setSize(imageBlockId, 50, 100, { sizeMode: 'Auto' });
+    //engine.block.setWidthMode(imageBlockId, 'Percent');
+    //engine.block.setHeightMode(imageBlockId, 'Percent');
+    //engine.block.setWidth(imageBlockId, 0.5);
+    //engine.block.setHeight(imageBlockId, 1.0);
 
     // Get computed dimensions (actual pixel values after layout)
     const computedWidth = engine.block.getFloat(imageBlockId,"lastFrame/width");
@@ -201,18 +206,27 @@
     ).href;
 
     // Create background image that fills page
-    const bgBlock = engine.block.create('graphic');
-    engine.block.setShape(bgBlock, engine.block.createShape('rect'));
+    // create image fill
     const imageFill = engine.block.createFill('image');
     engine.block.setString(imageFill, 'fill/image/imageFileURI', bgBlockUrl);
-    engine.block.setFill(bgBlock, imageFill);
-    engine.block.setContentFillMode(bgBlock, 'Cover');
+
+    // apply fill to the page itself
+    engine.block.setFill(pageBlockId, imageFill);
+    engine.block.setContentFillMode(pageBlockId, 'Cover'); // optional: fit behavior
+
+    //const bgBlock = engine.block.create('graphic');
+    //engine.block.setShape(bgBlock, engine.block.createShape('rect'));
+    //const imageFill = engine.block.createFill('image');
+    //engine.block.setString(imageFill, 'fill/image/imageFileURI', bgBlockUrl);
+    //engine.block.setFill(bgBlock, pageBlockId, imageFill);
+    //engine.block.setContentFillMode(bgBlock, 'Cover');
 
     // Add to page
-    engine.block.appendChild(pageBlockId, bgBlock);
+    //engine.block.appendChild(pageBlockId, bgBlock);
+    //engine.block.fillParent(bgBlock, true);
 
     // Send to back so other content appears on top
-    engine.block.sendToBack(bgBlock);
+    //engine.block.sendToBack(bgBlock);
     //console.log('Added page background', { pageBlockId, bgBlockUrl, bgBlock });
 
   }
