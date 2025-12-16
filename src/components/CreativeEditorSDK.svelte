@@ -23,7 +23,7 @@
     /** @type {'local'}*/
     const ON_UPLOAD = 'local';
     const defaultConfig = {
-      license: '<YOUR_CSDK_LICENSE>', // replace it with a valid CE.SDK license key
+      license: 'YOUR_CESDK_LICENSE_KEY', // replace it with a valid CE.SDK license key
       callbacks: { onUpload: ON_UPLOAD }, // enable local file uploads in the Asset Library
       // other default configs...
     };
@@ -54,6 +54,58 @@
             cesdk.addDefaultAssetSources(),
             cesdk.addDemoAssetSources({ sceneMode: 'Design' }),
           ]);
+          
+          // Add custom layout button
+          const caseAssetPath = (path) => `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+          // Remote assets hosted in the CESDK web examples repo
+          const layoutBaseUrl = 'https://raw.githubusercontent.com/imgly/cesdk-web-examples/main/showcase-layouts/public/cases/layouts/';
+          const layoutManifestUrl = `${layoutBaseUrl}CustomLayouts.json`;
+
+          try {
+            const layoutResponse = await fetch(layoutManifestUrl);
+            if (!layoutResponse.ok) {
+              throw new Error(`Failed to load layouts manifest (HTTP ${layoutResponse.status})`);
+            }
+            const layoutManifest = await layoutResponse.json();
+
+            await cesdk.engine.asset.addLocalAssetSourceFromJSONString(
+              JSON.stringify(layoutManifest),
+              layoutBaseUrl
+            );
+
+            // Make the custom layouts visible in the Asset Library
+            cesdk.ui.addAssetLibraryEntry({
+              id: 'ly.img.layouts',
+              sourceIds: ['ly.img.layouts'],
+              title: 'Layouts',
+              icon: caseAssetPath('/collage-small.svg'),
+              gridBackgroundType: 'cover'
+            });
+
+            cesdk.ui.setDockOrder(
+              [
+        {
+          id: 'ly.img.assetLibrary.dock',
+          key: 'ly.img.layouts',
+          label: 'libraries.ly.img.layouts.label',
+          icon: ({ iconSize }) => {
+            return iconSize === 'normal'
+              ? caseAssetPath('/collage-small.svg')
+              : caseAssetPath('/collage-large.svg');
+          },
+          entries: ['ly.img.layouts']
+        },
+        'ly.img.separator',
+        ...cesdk.ui
+          .getDockOrder()
+          .filter(({ key }) => !['ly.img.template'].includes(key))
+      ]
+            );
+          } catch (error) {
+            console.warn('Failed to add custom layout source', error);
+          }
+
+          
 
           //await cesdk.addPlugin(
             //BackgroundRemovalPlugin({

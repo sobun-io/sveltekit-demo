@@ -174,6 +174,102 @@
     thumbnailEngine = null;
   });
 
+  async function newScene() {
+  if (!engine) return;
+
+  // Clear object URLs and local state
+  disposeObjectUrls(fillState.previewUrl, fillState.objectUrl);
+  updateFillState({ previewUrl: '', objectUrl: '', fillId: null });
+  imageBlockId = null;
+  videoBlockId = null;
+
+  // Destroy existing scene and create a fresh empty one
+  const currentScene = engine.scene.get();
+  if (currentScene) {
+    engine.block.destroy(currentScene);
+  }
+
+
+  const newScene = engine.scene.create();
+  const newPage = engine.block.create('page');
+  engine.block.appendChild(newScene, newPage);
+  pageBlockId = newPage;
+
+  // If you want to keep the engine element visible, zoom to the new page
+  engine.scene.zoomToBlock(newPage);
+  }
+
+async function verticalLayout() {
+    if (!engine) return;
+
+    // sceneLayout expects a string (Free|VerticalStack|HorizontalStack|DepthStack), not an object
+    const verticalScene = engine.scene.create("VerticalStack");
+    const [stack] = engine.block.findByType('stack');
+    // Pages go in the stack
+    const page1 = engine.block.create('page');
+    engine.block.setWidth(page1, 800);
+    engine.block.setHeight(page1, 600);
+    engine.block.appendChild(stack, page1);
+
+    const page2 = engine.block.create('page');
+    engine.block.setWidth(page2, 800);
+    engine.block.setHeight(page2, 600);
+    engine.block.appendChild(stack, page2);
+
+    engine.block.setFloat(stack, 'stack/spacing', 20);
+    engine.block.setBool(stack, 'stack/spacingInScreenspace', true);
+
+    // Ensure we have a fill to reuse across blocks
+    let fillId = fillState.fillId;
+    if (fillId == null) {
+      fillId = engine.block.createFill('image');
+      updateFillState({ fillId });
+      engine.block.setString(fillId, 'fill/image/imageFileURI', originalImageUri);
+    }
+
+    // Add blocks
+    //const block1 = engine.block.create('graphic');
+    //engine.block.setShape(block1, engine.block.createShape('rect'));
+    //engine.block.setFill(block1, fillId);
+    //engine.block.setPositionX(block1, 100);
+    //engine.block.setPositionY(block1, 100);
+    //engine.block.appendChild(page, block1);
+
+    const block2 = engine.block.create('graphic');
+    engine.block.setShape(block2, engine.block.createShape('rect'));
+    engine.block.setFill(block2, fillId);
+    engine.block.setPositionX(block2, 100);
+    engine.block.setPositionY(block2, 100);
+    engine.block.appendChild(page2, block2);
+
+    //Reorder pages in the stack
+    // Store existing stack
+    const [stackScene] = engine.block.findByType('stack');
+    // Move page #1 to index 1 (after page 2)
+    engine.block.insertChild(stackScene, page1, 1); // Insert at index 2
+
+    //const [stackScene] = engine.block.findByType('stack');
+    //const newPage = engine.block.create('page');
+    //engine.block.setWidth(newPage, 800);
+    //engine.block.setHeight(newPage, 600);
+    //engine.block.appendChild(stackScene, newPage);
+
+    //const block3 = engine.block.create('graphic');
+    //engine.block.setFill(block3, fillId);
+    //engine.block.appendChild(scene, block3);
+
+    //const block1 = [engine.block.create('graphic'), engine.block.create('graphic'), engine.block.create('graphic')];
+    //for (const block of blocks) {
+      //engine.block.setShape(block, engine.block.createShape('rect'));
+      //engine.block.setFill(block, fillId);
+      //engine.block.appendChild(page, block);
+    //}
+
+    //engine.scene.zoomToBlock(page);
+  }
+
+
+
   async function autoSize() {
     // Fill 50% of parent width, 100% of parent height
     if (!engine || imageBlockId == null) return;
@@ -400,6 +496,8 @@
     <button on:click={() => batchProcess()}>Generate Thumbnail</button>
     <button on:click={() => batchExport()}>Batch Export</button>
     <button on:click={() => exportCompressedImage()}>Compress + Export</button>
+    <button on:click={() => newScene()}>New Scene</button>
+    <button on:click={() => verticalLayout()}>Vertical Layout</button>
 
 
     <button on:click={() => exportImage()}>Export</button>
