@@ -23,7 +23,7 @@
     /** @type {'local'}*/
     const ON_UPLOAD = 'local';
     const defaultConfig = {
-      license: 'YOUR_CESDK_LICENSE_KEY', // replace it with a valid CE.SDK license key
+      license: 'YOUR_CESDKz', // replace it with a valid CE.SDK license key
       callbacks: { onUpload: ON_UPLOAD }, // enable local file uploads in the Asset Library
       // other default configs...
     };

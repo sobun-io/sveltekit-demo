@@ -216,9 +216,16 @@ async function verticalLayout() {
     engine.block.setHeight(page2, 600);
     engine.block.appendChild(stack, page2);
 
-    engine.block.setFloat(stack, 'stack/spacing', 20);
-    engine.block.setBool(stack, 'stack/spacingInScreenspace', true);
-
+    engine.block.setFloat(stack, 'stack/spacing', 100);
+    //engine.block.getFloat(stack, 'stack/spacing');
+    console.log('Stack spacing is', engine.block.getFloat(stack, 'stack/spacing'));
+    //engine.block.setBool(stack, 'stack/spacingInScreenspace', true);
+    const layout = engine.scene.getLayout(verticalScene);
+    engine.scene.setLayout('Free');
+    engine.block.setFloat(page1, 'position/x', 100);
+    engine.block.setFloat(page1, 'position/y', 100);
+    engine.block.setFloat(page2, 'position/x', 100);
+    engine.block.setFloat(page2, 'position/y', 800);
     // Ensure we have a fill to reuse across blocks
     let fillId = fillState.fillId;
     if (fillId == null) {
@@ -246,7 +253,7 @@ async function verticalLayout() {
     // Store existing stack
     const [stackScene] = engine.block.findByType('stack');
     // Move page #1 to index 1 (after page 2)
-    engine.block.insertChild(stackScene, page1, 1); // Insert at index 2
+    //engine.block.insertChild(stackScene, page1, 1); // Insert at index 2
 
     //const [stackScene] = engine.block.findByType('stack');
     //const newPage = engine.block.create('page');
@@ -268,7 +275,58 @@ async function verticalLayout() {
     //engine.scene.zoomToBlock(page);
   }
 
+  async function magazineLayout() {
+    const magazine = engine.scene.create('HorizontalStack');
+    const [stack] = engine.block.findByType('stack');
 
+    // Pages go in the stack
+    const page1 = engine.block.create('page');
+    engine.block.setWidth(page1, 800);
+    engine.block.setHeight(page1, 1200);
+    engine.block.appendChild(stack, page1);
+
+    const page2 = engine.block.create('page');
+    engine.block.setWidth(page2, 800);
+    engine.block.setHeight(page2, 1200);
+    engine.block.appendChild(stack, page2);
+
+    engine.block.setFloat(stack, 'stack/spacing', 0);
+
+    // Ensure we have a fill to reuse across blocks
+    let fillId = fillState.fillId;
+    if (fillId == null) {
+      fillId = engine.block.createFill('image');
+      updateFillState({ fillId });
+      engine.block.setString(fillId, 'fill/image/imageFileURI', originalImageUri);
+    }
+
+    const cover = engine.block.create('graphic');
+    engine.block.setShape(cover, engine.block.createShape('star'));
+    engine.block.setFill(cover, fillId);
+    engine.block.scale(cover, 6.0);
+    engine.block.setPositionX(cover, 100);
+    engine.block.setPositionY(cover, 350);
+    engine.block.appendChild(page2, cover);
+
+    const title = engine.block.create('text');
+    engine.block.replaceText(title, 'Meow Magazine');
+    engine.block.scale(title, 2.0);
+    engine.block.setPositionX(title, 100);
+    engine.block.setPositionY(title, 350);
+    engine.block.appendChild(page2, title);
+
+    const back = engine.block.create('graphic');
+    engine.block.setFill(back, fillId);
+    engine.block.setShape(back, engine.block.createShape('rect'));
+    engine.block.appendChild(page1, back);
+    engine.block.fillParent(back, true);
+
+  
+    
+
+
+
+  }
 
   async function autoSize() {
     // Fill 50% of parent width, 100% of parent height
@@ -498,6 +556,7 @@ async function verticalLayout() {
     <button on:click={() => exportCompressedImage()}>Compress + Export</button>
     <button on:click={() => newScene()}>New Scene</button>
     <button on:click={() => verticalLayout()}>Vertical Layout</button>
+    <button on:click={() => magazineLayout()}>Magazine Layout</button>
 
 
     <button on:click={() => exportImage()}>Export</button>
